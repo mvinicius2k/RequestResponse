@@ -8,17 +8,17 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
-import main.client.Message;
-import main.client.MessageRequest;
-import main.client.RemoteObjectRef;
-import main.merged.IMessage;
+import main.merged.Constants;
+import main.merged.Message;
+import main.merged.MessageRequest;
 
 public class Server {
 
-	public static final int bufferSize = 1024;
+	
 	private InetAddress lastClientIp;
 	private int lastClientPort;
 	private DatagramSocket socket;
+	
 	
 	public Server(int serverPort) throws SocketException {
 		this.socket = new DatagramSocket(serverPort);
@@ -31,10 +31,10 @@ public class Server {
 	 * @return null se não receber uma requisição
 	 */
 	public byte[] getRequisicao() {
-		byte[] buffer = new byte[bufferSize];
+		byte[] buffer = new byte[Constants.BUFFER_SIZE];
 		DatagramPacket request = new DatagramPacket(
 				buffer,
-				bufferSize
+				Constants.BUFFER_SIZE
 			);
 		
 		try {
@@ -62,7 +62,7 @@ public class Server {
 				lastClientIp,
 				lastClientPort);
 		try {
-			
+			System.out.println("Mandando resposta para " + lastClientIp + ":" + lastClientPort);
 			socket.send(resposta);
 		} catch (IOException e) {
 			System.out.print(e.getMessage());
@@ -97,20 +97,25 @@ public class Server {
 			
 			
 			//String messageText = new String(message.getArgs());
-			//System.out.println("Argumento recebido de " + lastClientIp.toString() + " -> " + messageText);
+			System.out.println("Argumento recebido de " + lastClientIp.toString());
 					
 			if(message.getRemoteObjectRef().getmInterface().equals(Message.class)) {
 				
 				
 				
-				MessageRequest request = new MessageRequest(message.getMethodId(), message.getArgs());
+				MessageRequest response = new MessageRequest(message.getMethodId(), message.getArgs());
 				
-				for(Method m : message.getRemoteObjectRef().getmInterface().getMethods()) {
-					System.out.print(m.getName() + " | " + m.hashCode());
+				for(Method m : message.getRemoteObjectRef().getmInterface().getDeclaredMethods()) {
+					System.out.print(m.getName() + " | id=" + m.hashCode());
 					if(m.hashCode() == message.getMethodId() ) {
-						System.out.print(" <---- Foi chamado");
+						System.out.println(" <---- Foi chamado {\n---------------------------------");
+						Object[] args = message.getObjectsArgs();
 						
-					
+						Message instance = new Message();
+						m.invoke(instance, args);
+						
+						System.out.print("\n---------------------------------\n}");
+						
 						
 					}
 					System.out.print("\n");
@@ -119,7 +124,7 @@ public class Server {
 					
 				}
 				
-				sendReply(request.toBytes());
+				sendReply(response.toBytes());
 				
 			} else {
 				System.out.println(message.getRemoteObjectRef().getmInterface().toString());

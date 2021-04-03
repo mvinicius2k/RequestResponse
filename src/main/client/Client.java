@@ -6,27 +6,48 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.time.LocalDateTime;
-import java.time.temporal.TemporalField;
 
-import main.merged.IMessage;
-import main.server.Server;
+import main.merged.Constants;
+import main.merged.Message;
+import main.merged.MessageRequest;
+import main.merged.RemoteObjectRef;
 
 public class Client {
 
 	
+	private int serverPort;
+	
 	private Message message;
+	
+	
 	
 	/**
 	 * @param message
 	 */
-	public Client(Message message) {
+	public Client(Message message, int serverPort) {
 		super();
 		this.message = message;
+		this.serverPort = serverPort;
+	}
+	
+	private Method getMethod(String methodName, Method[] methods) {
+		for(Method m : methods) {
+			if(m.getName().equals(methodName)) {
+				return m;
+				
+			}	
+						
+		}
+		
+		return null;
 	}
 
-	
-	public void doOperation() throws IOException {
+	/**
+	 * Enviar a mensagem e recebe uma resposta
+	 * @throws IOException
+	 * @throws NoSuchMethodException 
+	 */
+	public void doOperation(String methodName, String[] args) throws IOException, NoSuchMethodException {
 		
 		InetAddress ip = null;
 		try {
@@ -37,45 +58,51 @@ public class Client {
 		}
 		
 		
-		Class<IMessage> obj = (Class<IMessage>) message.getClass();
+		//Objeto remoto
+		Class<?> obj = null;
+		obj = message.getClass();
+			
+		
+		
+		
+		
 		
 		RemoteObjectRef ref = new RemoteObjectRef(
 				ip,
-				1234,
+				this.serverPort,
 				obj.hashCode(),
 				0,
 				obj);
 
-		int id = -1;
-		
-		for(Method m : obj.getMethods()) {
-			if(m.getName() == "append") {
-				id = m.hashCode();
-			}
-				
-						
-		}
-		
-		
-		String args = "Texto";
 		
 		
 		
 		
-		MessageRequest request = new MessageRequest(ref, id, args.getBytes());
 		
-		DatagramPacket packet = new DatagramPacket(request.toBytes(), 0, request.toBytes().length, ip, 1234);
+		Method m = getMethod(methodName, obj.getMethods());
+		
+		if(m == null)
+			throw new NoSuchMethodException();
+		
+		int id = m.hashCode();
+		
+		
+		
+		MessageRequest request = new MessageRequest(ref, id, args);
+		
+		DatagramPacket packet = new DatagramPacket(request.toBytes(), 0, request.toBytes().length, ip, Constants.SERVER_PORT);
 		
 	
 		DatagramSocket socket = new DatagramSocket();
 		
 		socket.send(packet);
 		
-		byte[] buffer = new byte[Server.bufferSize];
+		byte[] buffer = new byte[Constants.BUFFER_SIZE];
 		
 		DatagramPacket response = new DatagramPacket(buffer, buffer.length);
 		
 		socket.receive(response);
+		System.out.println("Resposta recebida\n");
 		
 		byte[] result = response.getData();
 		

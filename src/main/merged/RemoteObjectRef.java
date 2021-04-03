@@ -1,9 +1,8 @@
-package main.client;
+package main.merged;
 
 import java.io.Serializable;
 import java.net.InetAddress;
 
-import main.merged.IMessage;
 
 public class RemoteObjectRef implements Serializable{
 
@@ -20,7 +19,7 @@ public class RemoteObjectRef implements Serializable{
 	private long time;
 	
 
-	private Class<IMessage> mInterface;
+	private Class<?> mInterface;
 	
 	
 	
@@ -32,7 +31,7 @@ public class RemoteObjectRef implements Serializable{
 	 * @param time
 	 * @param mInterface
 	 */
-	public RemoteObjectRef(InetAddress ip, int port, int objectId, long time, Class<IMessage> mInterface) {
+	public RemoteObjectRef(InetAddress ip, int port, int objectId, long time, Class<?> mInterface) {
 		super();
 		this.ip = ip;
 		this.port = port;
@@ -56,11 +55,11 @@ public class RemoteObjectRef implements Serializable{
 				+ ", mInterface=" + mInterface + "]";
 	}
 
-	public Class getmInterface() {
+	public Class<?> getmInterface() {
 		return mInterface;
 	}
 
-	public void setmInterface(Class mInterface) {
+	public void setmInterface(Class<?> mInterface) {
 		this.mInterface = mInterface;
 	}
 	

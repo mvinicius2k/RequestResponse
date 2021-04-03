@@ -3,41 +3,51 @@ package main.server;
 import java.lang.reflect.InvocationTargetException;
 import java.net.SocketException;
 
+import main.merged.Constants;
+
+
 public class ServerExec {
 
+	private static Server server = null;
+	
 	public static void main(String[] args) {
-		Server server = null;
+		
+		
+		
 		try {
-			server = new Server(1234);
-			server.listener(500);
+			createServer(Integer.valueOf(args[0]));
 			
 		} catch (SocketException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
+		}catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		} catch (ArrayIndexOutOfBoundsException e) {
+			System.out.println("Usando porta predefinida -> " + Constants.SERVER_PORT);
+			main(new String[] {
+					String.valueOf(Constants.SERVER_PORT)
+				});
+		} catch (IllegalAccessException e) {
+			System.out.println("Digite uma porta como inteiro");
+			
+		} 
 		
 		
 		
 		
 
+	}
+	
+	private static void createServer(int port) throws SocketException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, InterruptedException {
+		server = new Server(port);
+		server.listener(500);
 	}
 
 }

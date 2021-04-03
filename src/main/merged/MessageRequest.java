@@ -1,14 +1,14 @@
-package main.client;
+package main.merged;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import main.merged.IMessage;
 
 public class MessageRequest implements Serializable{
 
@@ -36,13 +36,14 @@ public class MessageRequest implements Serializable{
 	 * @param remoteObjectRef
 	 * @param methodId
 	 * @param args
+	 * @throws IOException 
 	 */
-	public MessageRequest(RemoteObjectRef remoteObjectRef, int methodId, byte[] args) {
+	public MessageRequest(RemoteObjectRef remoteObjectRef, int methodId, Object[] args) throws IOException {
 		super();
 		
 		this.remoteObjectRef = remoteObjectRef;
 		this.methodId = methodId;
-		this.args = args;
+		this.args = toByteArray(args);
 		
 		this.type = REQUEST;
 		this.requestId = next++;
@@ -94,6 +95,10 @@ public class MessageRequest implements Serializable{
 	 * Retorna null se houver falha.
 	 */
 	public static MessageRequest fromBytes(byte[] bytes) {
+		return (MessageRequest) bytesToObject(bytes);
+	}
+	
+	private static Object bytesToObject(byte[] bytes) {
 		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
 		ObjectInput input = null;
 		Object obj;
@@ -109,7 +114,7 @@ public class MessageRequest implements Serializable{
 		try {
 			if(input != null)
 				input.close();
-			return (MessageRequest) obj;
+			return obj;
 		} catch (Exception e) {
 			System.err.println(e.getMessage());;
 			e.printStackTrace();
@@ -127,12 +132,48 @@ public class MessageRequest implements Serializable{
 		this.methodId = methodId;
 	}
 
+	
 	public byte[] getArgs() {
 		return args;
+	}
+	
+	/**
+	 * 
+	 * @return Argumentos convertidos em array de objeto
+	 */
+	public Object[] getObjectsArgs() {
+		return (Object[]) bytesToObject(args);
 	}
 
 	public void setArgs(byte[] args) {
 		this.args = args;
+	}
+	
+	public void setArgs(String[] args) throws IOException {
+		this.args = toByteArray(args);
+	}
+	
+	private byte[] toByteArray(Object[] obj) throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutputStream out = null;
+		byte[] outputBytes = null;
+		try {
+		  out = new ObjectOutputStream(bos);   
+		  out.writeObject(obj);
+		  out.flush();
+		  outputBytes = bos.toByteArray();
+		  
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		} finally {
+		  try {
+		    bos.close();
+		  } catch (IOException ex) {
+			  System.out.println(ex.getMessage());
+		  }
+		}
+		
+		return outputBytes;
 	}
 
 	@Override
