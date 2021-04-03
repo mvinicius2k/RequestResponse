@@ -21,6 +21,7 @@ public class Server {
 	
 	
 	public Server(int serverPort) throws SocketException {
+		System.out.println("Servidor iniciado na porta " + serverPort);
 		this.socket = new DatagramSocket(serverPort);
 		
 		
@@ -85,7 +86,7 @@ public class Server {
 	 * @throws IllegalAccessException 
 	 */
 	public void listener(long delay) throws InterruptedException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		System.out.println("Escutando na porta 1234");
+		System.out.println("Escutando a cada " + delay + "ms...");
 		while(true) {
 			Thread.sleep(delay);
 			
