@@ -48,7 +48,7 @@ public class Client {
 	 * @throws NoSuchMethodException 
 	 */
 	public void doOperation(String methodName, String[] args) throws IOException, NoSuchMethodException {
-		
+		System.out.println("Mandando  requisição para localhost:" + serverPort);
 		InetAddress ip = null;
 		try {
 			ip = InetAddress.getLocalHost();
@@ -90,7 +90,7 @@ public class Client {
 		
 		MessageRequest request = new MessageRequest(ref, id, args);
 		
-		DatagramPacket packet = new DatagramPacket(request.toBytes(), 0, request.toBytes().length, ip, Constants.SERVER_PORT);
+		DatagramPacket packet = new DatagramPacket(request.toBytes(), 0, request.toBytes().length, ip, serverPort);
 		
 	
 		DatagramSocket socket = new DatagramSocket();

@@ -15,17 +15,20 @@ public class ClientExec {
 		
 		
 		
+		
 		try {
 			if(args.length > 1)
 				createClient(args);
 			else {
 				System.out.println("Nenhum método digitado, usando padrão 'upper Escrevendo mensagem no cliente'");
-				String port;
+				String port = "";
 				if(args.length == 0) {
 					System.out.println("Nenhuma porta digitada, usando padrão " + Constants.SERVER_PORT);;
 					port = String.valueOf(Constants.SERVER_PORT);
-				} else 
+				} else {
 					port = args[0];
+				}
+					
 				
 				main(new String[] {
 						port,
@@ -38,7 +41,7 @@ public class ClientExec {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NoSuchMethodException e) {
-			System.out.println("Método "  + args[0] + " não existe");
+			System.out.println("Método "  + args[1] + " não existe");
 			e.printStackTrace();
 		} catch (ArrayIndexOutOfBoundsException e) {
 			
@@ -51,7 +54,14 @@ public class ClientExec {
 	private static void createClient(String[] args) throws NoSuchMethodException, IOException {
 		message = new Message();
 		
-		client = new Client(message, Integer.valueOf(args[0]));
+		String port = args[0];
+		
+		if(!port.matches("^[0-9]*$")) {
+			System.out.println("Usando porta padrão " + Constants.SERVER_PORT);
+			port = String.valueOf(Constants.SERVER_PORT);
+		}
+		
+		client = new Client(message, Integer.valueOf(port));
 		
 		String[] arguments = new String[args.length-2];
 		
